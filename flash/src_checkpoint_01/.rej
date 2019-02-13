@@ -1,0 +1,245 @@
+--- Deck.js
++++ Deck.js
+@@ -10,17 +10,16 @@ class Deck extends Component {
+   static displayName = "Deck";
+ 
+   _review = () => {
+-    console.warn("Not implemented");
++    this.props.review();
+   };
+ 
+   _addCards = () => {
+-    console.warn("Not implemented");
++    this.props.add();
+   };
+ 
+   render() {
+     return (
+       <View style={styles.deckGroup}>
+-
+         <Button style={styles.deckButton} onPress={this._review}>
+           <NormalText>
+             {this.props.deck.name}: {this.props.count} cards
+--- DeckCreation.js
++++ DeckCreation.js
+@@ -10,8 +10,8 @@ class DeckCreation extends Component {
+   }
+ 
+   _newDeck = name => {
+-    console.warn("Not implemented");
+     this.setState({ showingNameField: false });
++    this.props.create(name);
+   };
+ 
+   _showField = () => {
+--- index.js
++++ index.js
+@@ -8,18 +8,43 @@ import DeckCreation from "./DeckCreation";
+ class DecksScreen extends Component {
+   static displayName = "DecksScreen";
+ 
++  static navigationOptions = { title: "All Decks" };
++
+   constructor(props) {
+     super(props);
+     this.state = { decks: MockDecks };
+   }
+ 
++  _createDeck = () => {
++    console.warn("Data saving not implemented");
++    this.props.navigation.navigate("CardCreation");
++  };
++
++  _addCards = () => {
++    console.warn("Data saving not implemented");
++    this.props.navigation.navigate("CardCreation");
++  };
++
++  _review = () => {
++    console.warn("Actual reviews not implemented");
++    this.props.navigation.navigate("Review");
++  };
++
+   _mkDeckViews() {
+     if (!this.state.decks) {
+       return null;
+     }
+ 
+     return this.state.decks.map(deck => {
+-      return <Deck deck={deck} count={deck.cards.length} key={deck.id} />;
++      return (
++        <Deck
++          deck={deck}
++          count={deck.cards.length}
++          key={deck.id}
++          add={this._addCards}
++          review={this._review}
++        />
++      );
+     });
+   }
+ 
+@@ -27,7 +52,7 @@ class DecksScreen extends Component {
+     return (
+       <View>
+         {this._mkDeckViews()}
+-        <DeckCreation />
++        <DeckCreation create={this._createDeck} />
+       </View>
+     );
+   }
+--- Flashcards.js
++++ Flashcards.js
+@@ -1,27 +1,21 @@
+ import React, { Component } from "react";
+ import { StyleSheet, View } from "react-native";
++import { StackNavigator } from "react-navigation";
+ 
+-import Heading from "./Header";
++import Logo from "./Header/Logo";
+ import DeckScreen from "./DeckScreen";
+ import NewCardScreen from "./NewCardScreen";
+ import ReviewScreen from "./ReviewScreen";
+ 
+-class Flashcards extends Component {
+-  _renderScene() {
+-    // return <ReviewScreen />;
+-    // return <NewCardScreen />;
+-    return <DeckScreen />;
+-  }
+-  render() {
+-    return (
+-      <View style={styles.container}>
+-        <Heading />
+-        {this._renderScene()}
+-      </View>
+-    );
+-  }
+-}
++let headerOptions = {
++  headerStyle: { backgroundColor: "#FFFFFF" },
++  headerLeft: <Logo />
++};
+ 
+-const styles = StyleSheet.create({ container: { flex: 1, marginTop: 30 } });
++let navigator = StackNavigator({
++  Home: { screen: DeckScreen, navigationOptions: headerOptions },
++  Review: { screen: ReviewScreen, navigationOptions: headerOptions },
++  CardCreation: { screen: NewCardScreen, navigationOptions: headerOptions }
++});
+ 
+-export default Flashcards;
++export default navigator;
+--- Logo.js
++++ Logo.js
+@@ -0,0 +1,14 @@
++import React, { Component } from "react";
++import { Image } from "react-native";
++
++import styles from "./styles";
++
++class Logo extends Component {
++  static displayName = "Logo";
++
++  render() {
++    return <Image source={require("../../../icon.png")} style={styles.logo} />;
++  }
++}
++
++export default Logo;
+--- index.js
++++ index.js
+@@ -1,8 +1,9 @@
+ import React, { Component } from "react";
+-import { View, Image } from "react-native";
++import { View } from "react-native";
+ 
+ import styles from "./styles";
+ import HeadingText from "./../HeadingText";
++import Logo from "./Logo";
+ 
+ class Header extends Component {
+   static displayName = "Header";
+@@ -10,7 +11,7 @@ class Header extends Component {
+   render() {
+     return (
+       <View style={styles.header}>
+-        <Image source={require("../../../icon.png")} style={styles.logo} />
++        <Logo />
+         <HeadingText>FLASHCARDS</HeadingText>
+       </View>
+     );
+--- Input.js
++++ Input.js
+@@ -48,6 +48,8 @@ class Input extends Component {
+   }
+ }
+ 
++Input.defaultProps = { clearOnSubmit: true };
++
+ export default Input;
+ 
+ const styles = StyleSheet.create({
+--- index.js
++++ index.js
+@@ -9,9 +9,13 @@ import NormalText from "../NormalText";
+ import colors from "./../../styles/colors";
+ 
+ class NewCard extends Component {
++  static navigationOptions = { title: "Create Card" };
++
++  static initialState = { front: "", back: "" };
++
+   constructor(props) {
+     super(props);
+-    this.state = { font: "", back: "" };
++    this.state = this.initialState;
+   }
+ 
+   _handleFront = text => {
+@@ -23,15 +27,16 @@ class NewCard extends Component {
+   };
+ 
+   _createCard = () => {
+-    console.warn("Not implemented");
++    console.warn("Data saving not implemented");
++    this.props.navigation.navigate("CardCreation");
+   };
+ 
+   _reviewDeck = () => {
+-    console.warn("Not implemented");
++    this.props.navigation.navigate("Review");
+   };
+ 
+   _doneCreating = () => {
+-    console.warn("Not implemented");
++    this.props.navigation.navigate("Home");
+   };
+ 
+   render() {
+--- index.js
++++ index.js
+@@ -9,6 +9,8 @@ import colors from "./../../styles/colors";
+ class ReviewScreen extends Component {
+   static displayName = "ReviewScreen";
+ 
++  static navigationOptions = { title: "Review" };
++
+   constructor(props) {
+     super(props);
+     this.state = {
+@@ -27,11 +29,13 @@ class ReviewScreen extends Component {
+   };
+ 
+   _nextReview = () => {
++    console.warn("Showing next review, but data saving not implemented.");
+     this.setState({ currentReview: this.state.currentReview + 1 });
+   };
+ 
+   _quitReviewing = () => {
+-    console.warn("Not implemented");
++    console.warn("Data saving not implemented");
++    this.props.navigation.goBack();
+   };
+ 
+   _contents() {
