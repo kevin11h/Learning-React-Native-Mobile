@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { StyleSheet, View } from "react-native";
-import { StackNavigator } from "react-navigation";
+import { createStackNavigator,
+         createAppContainer } from "react-navigation";
 import { createStore } from "redux";
 import { Provider } from "react-redux";
 
@@ -25,7 +26,7 @@ readDecks().then(decks => {
   store.dispatch(loadData(decks));
 });
 
-const Navigator = StackNavigator({
+const Navigator = createAppContainer(createStackNavigator({
   Home: { screen: DeckScreen, navigationOptions: headerOptions },
   Review: { screen: ReviewScreen, navigationOptions: headerOptions },
   CardCreation: {
@@ -33,7 +34,7 @@ const Navigator = StackNavigator({
     path: "createCard/:deckID",
     navigationOptions: headerOptions
   }
-});
+}));
 
 class App extends Component {
   render() {
