@@ -1,5 +1,6 @@
 ## File Structure
-src_checkpoint_04/
+<pre>
+flash/src-code/
 ├── actions
 │   ├── creators.js
 │   ├── creators.js.orig
@@ -46,6 +47,7 @@ src_checkpoint_04/
 └── styles
     ├── colors.js
     └── fonts.js
+</pre>
 
 
 ## Dependencies
